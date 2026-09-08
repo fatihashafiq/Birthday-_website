@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Special Surprise</title>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background: radial-gradient(circle at top, #2b0509 0%, #050102 100%);
+      color: #fce8eb;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    .app-card {
+      width: 360px;
+      height: 640px;
+      background: rgba(15, 5, 8, 0.85);
+      border: 1px solid rgba(255, 75, 110, 0.2);
+      border-radius: 24px;
+      box-shadow: 0 0 30px rgba(255, 30, 70, 0.15);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .page {
+      display: none;
+      width: 100%;
+      height: 100%;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      position: absolute;
+      top: 0;
+      left: 0;
+      padding: 24px 20px;
+    }
+
+    .page.active {
+      display: flex;
+    }
+
+    /* Page 1: Lock Screen */
+    .profile-img {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #ff4b6e;
+      box-shadow: 0 0 15px rgba(255, 75, 110, 0.5);
+      cursor: pointer;
+      margin-bottom: 12px;
+    }
+
+    h2 {
+      font-size: 1.3rem;
+      letter-spacing: 2px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .hint-text {
+      font-size: 0.85rem;
+      color: #b0808a;
+      margin-bottom: 15px;
+    }
+
+    .passcode-display {
+      width: 80%;
+      height: 45px;
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .dot.filled {
+      background: #ff4b6e;
+      box-shadow: 0 0 8px #ff4b6e;
+    }
+
+    .keypad {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      width: 85%;
+    }
+
+    .key {
+      height: 50px;
+      background: rgba(40, 15, 22, 0.6);
+      border: 1px solid rgba(255, 75, 110, 0.15);
+      border-radius: 12px;
+      color: #fff;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .key:active {
+      background: rgba(255, 75, 110, 0.3);
+    }
+
+    /* Common Panda Styling */
+    .panda-gif {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-bottom: 15px;
+      box-shadow: 0 0 20px rgba(255, 75, 110, 0.3);
+    }
+
+    /* Page 2: Loading */
+    .progress-bar-container {
+      width: 80%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      overflow: hidden;
+      margin: 15px 0 10px;
+    }
+
+    .progress-bar {
+      width: 0%;
+      height: 100%;
+      background: #ff4b6e;
+      transition: width 0.1s linear;
+    }
+
+    .sub-text {
+      font-size: 0.75rem;
+      letter-spacing: 2px;
+      color: #b0808a;
+    }
+
+    /* General Buttons */
+    .btn {
+      background: rgba(255, 75, 110, 0.15);
+      border: 1px solid #ff4b6e;
+      color: #fff;
+      padding: 10px 24px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      letter-spacing: 1px;
+      cursor: pointer;
+      margin-top: 15px;
+    }
+
+    .btn:active {
+      background: #ff4b6e;
+    }
+
+    /* Page 4: Slider */
+    .slider-container {
+      width: 100%;
+      height: 320px;
+      display: flex;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      gap: 12px;
+      padding: 10px 0;
+    }
+
+    .slider-container::-webkit-scrollbar {
+      display: none;
+    }
+
+    .slide-img {
+      min-width: 75%;
+      height: auto;
+      object-fit: contain;
+      border-radius: 16px;
+      margin: auto;
+      scroll-snap-align: center;
+      border: 1px solid rgba(255, 75, 110, 0.3);
+    }
+
+    /* Page 5: Heart Envelope */
+    .envelope-box {
+      width: 180px;
+      height: 120px;
+      background: rgba(40, 15, 22, 0.8);
+      border: 1px solid rgba(255, 75, 110, 0.4);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+    .heart-icon {
+      font-size: 2.2rem;
+      color: #ff4b6e;
+      cursor: pointer;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); }
+    }
+
+    /* Page 6: Letter */
+    .letter-card {
+      background: rgba(20, 8, 12, 0.95);
+      border: 1px solid rgba(255, 75, 110, 0.3);
+      border-radius: 16px;
+      padding: 20px;
+      width: 100%;
+      text-align: left;
+    }
+
+    .letter-title {
+      font-size: 1.1rem;
+      color: #ff4b6e;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .letter-body {
+      font-size: 0.9rem;
+      line-height: 1.5;
+      color: #e0d0d3;
+      margin-bottom: 20px;
+    }
+
+    .action-btn-group {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      width: 100%;
+    }
+
+    .action-btn {
+      flex: 1;
+      padding: 8px 10px;
+      font-size: 0.8rem;
+      border-radius: 15px;
+      border: 1px solid #ff4b6e;
+      background: rgba(255, 75, 110, 0.1);
+      color: #fff;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-card">
+
+    <!-- Page 1: Lock Screen -->
+    <div class="page active" id="page1">
+      <img src="https://ibb.co/r2JWNFsT" alt="Profile" class="profile-img" onclick="showHint()"/>
+      <h2>LOCKED</h2>
+      <p class="hint-text" id="hint-text">Hint - Click on picture to know passkey !</p>
+      
+      <div class="passcode-display">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+      </div>
+
+      <div class="keypad">
+        <div class="key" onclick="pressKey('1')">1</div>
+        <div class="key" onclick="pressKey('2')">2</div>
+        <div class="key" onclick="pressKey('3')">3</div>
+        <div class="key" onclick="pressKey('4')">4</div>
+        <div class="key" onclick="pressKey('5')">5</div>
+        <div class="key" onclick="pressKey('6')">6</div>
+        <div class="key" onclick="pressKey('7')">7</div>
+        <div class="key" onclick="pressKey('8')">8</div>
+        <div class="key" onclick="pressKey('9')">9</div>
+        <div class="key" onclick="deleteKey()">⌫</div>
+        <div class="key" onclick="pressKey('0')">0</div>
+      </div>
+    </div>
+
+    <!-- Page 2: Loading Screen (Panda 1) -->
+    <div class="page" id="page2">
+      <img src="https://ibb.co/PGg2rjWZ" alt="Panda Loading" class="panda-gif"/>
+      <h3 style="font-weight: 400; font-size: 1rem;">Loading something special...</h3>
+      <div class="progress-bar-container">
+        <div class="progress-bar" id="progress"></div>
+      </div>
+      <p class="sub-text">• JUST FOR YOU •</p>
+    </div>
+
+    <!-- Page 3: Special Day Intro (Panda 2) -->
+    <div class="page" id="page3">
+      <h2>It's Your Special Day 💖</h2>
+      <img src="https://ibb.co/PGg2rjWZ" alt="Panda Sleeping" class="panda-gif" style="margin-top: 15px;"/>
+      <p style="font-style: italic; color: #b0808a; font-size: 0.85rem; margin-top: 10px;">I made something special for you...</p>
+      <button class="btn" onclick="goToPage(4)">START ➔</button>
+    </div>
+
+    <!-- Page 4: Picture Slider -->
+    <div class="page" id="page4">
+      <h2>Sweet Pictures</h2>
+      <p style="font-size: 0.75rem; color: #b0808a; margin-bottom: 10px;">Swipe for more</p>
+      
+      <div class="slider-container">
+        <img src="https://ibb.co/wNXFh91h" class="slide-img" alt="Memory 1"/>
+        <img src="https://ibb.co/FL0wLG2s" class="slide-img" alt="Memory 2"/>
+        <img src="https://ibb.co/wrCLHLbj" class="slide-img" alt="Memory 3"/>
+      </div>
+
+      <button class="btn" onclick="goToPage(5)">✉ MESSAGE</button>
+    </div>
+
+    <!-- Page 5: Letter Heart Unseal -->
+    <div class="page" id="page5">
+      <h2>A LETTER, JUST FOR YOU</h2>
+      <p style="font-size: 0.8rem; color: #b0808a;">Tap the heart to unseal your message...</p>
+      
+      <div class="envelope-box">
+        <div class="heart-icon" onclick="goToPage(6)">❤️</div>
+      </div>
+    </div>
+
+    <!-- Page 6: Final Letter & Actions -->
+    <div class="page" id="page6">
+      <div class="letter-card">
+        <div class="letter-title">
+          <span>JUST FOR YOU ✨</span>
+        
+        </div>
+        <p style="font-size: 0.75rem; color: #b0808a; margin-bottom: 15px;">From my heart to yours</p>
+        
+        <h3 style="font-size: 1rem; margin-bottom: 10px;">Happy Birthday, Api ❤️</h3>
+        <p class="letter-body">
+          I hope your day is as amazing and Special as You are .Today is all about you and I hop it filled with laughter, love and everything that make you happy.
+          Thank you for being a such incredibal person.I am so gratefull to having you in my life. You deserve all the happiness all the world.May Allah bless you with a beautifull nasseb.
+          Enjoy your day to the fullest celebration and make Memories.
+          
+          
+          
+        </p>
+
+        <div class="action-btn-group">
+          <button class="action-btn" onclick="triggerCelebrate()">CELEBRATE ✨</button>
+          <button class="action-btn" onclick="restartApp()">RESTART ↺</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const CORRECT_PIN = "1234";
+    let enteredPin = "";
+
+    function showHint() {
+      alert("Passkey hint: 1234");
+    }
+
+    function pressKey(num) {
+      if (enteredPin.length < 4) {
+        enteredPin += num;
+        updateDots();
+      }
+      if (enteredPin.length === 4) {
+        setTimeout(checkPin, 200);
+      }
+    }
+
+    function deleteKey() {
+      enteredPin = enteredPin.slice(0, -1);
+      updateDots();
+    }
+
+    function updateDots() {
+      const dots = document.querySelectorAll('.dot');
+      dots.forEach((dot, index) => {
+        if (index < enteredPin.length) {
+          dot.classList.add('filled');
+        } else {
+          dot.classList.remove('filled');
+        }
+      });
+    }
+
+    function checkPin() {
+      if (enteredPin === CORRECT_PIN) {
+        goToPage(2);
+        startLoading();
+      } else {
+        alert("Incorrect Passkey! Try 1234");
+        enteredPin = "";
+        updateDots();
+      }
+    }
+
+    function goToPage(pageNum) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById(`page${pageNum}`).classList.add('active');
+    }
+
+    function startLoading() {
+      let progressBar = document.getElementById('progress');
+      let width = 0;
+      let interval = setInterval(() => {
+        if (width >= 100) {
+          clearInterval(interval);
+          setTimeout(() => {
+            goToPage(3);
+          }, 300);
+        } else {
+          width += 2;
+          progressBar.style.width = width + '%';
+        }
+      }, 40);
+    }
+
+    function triggerCelebrate() {
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 }
+      });
+    }
+
+    function restartApp() {
+      enteredPin = "";
+      updateDots();
+      document.getElementById('progress').style.width = '0%';
+      goToPage(1);
+    }
+  </script>
+
+</body>
+        </html>
+        
